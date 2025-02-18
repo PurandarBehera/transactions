@@ -5,10 +5,9 @@ import com.puru.springboot.transactions.dto.OrderResponse;
 import com.puru.springboot.transactions.entity.Order;
 import com.puru.springboot.transactions.service.OrderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -23,5 +22,12 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> placeOrder(@RequestBody OrderRequest orderRequest){
         return ResponseEntity.ok(orderService.placeOrderResponse(orderRequest));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Order>> retrieveAllOrders(
+            @RequestParam(value = "pageNo",defaultValue = "0",required = false) int pageNo,
+            @RequestParam(value = "pageSize",defaultValue = "2",required = false) int pageSize){
+        return ResponseEntity.ok(orderService.retrieveAllOrders(pageNo,pageSize));
     }
 }
