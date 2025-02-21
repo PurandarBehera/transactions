@@ -7,10 +7,13 @@ import com.puru.springboot.transactions.entity.Payment;
 import com.puru.springboot.transactions.exception.PaymentException;
 import com.puru.springboot.transactions.repository.OrderRepository;
 import com.puru.springboot.transactions.repository.PaymentRepository;
+import com.puru.springboot.transactions.response.OrderResponsePage;
+import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,11 +54,24 @@ public class OrderService {
         return orderResponse;
     }
 
-    public List<Order> retrieveAllOrders(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        Page<Order> orders= orderRepository.findAll(pageable);
+    public OrderResponsePage retrieveAllOrders(int pageNo, int pageSize,String sortBy ,String sortDir) {
 
-        List<Order> orderList = orders.getContent();
-        return orderList;
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+        Page<Order> ordersPage= orderRepository.findAll(pageable);
+
+        List<Order> orderList = ordersPage.getContent();
+
+        OrderResponsePage responsePage = new OrderResponsePage();
+        responsePage.setContent(orderList);
+        responsePage.setPageNo(ordersPage.getNumber());
+        responsePage.setPageSize(ordersPage.getSize());
+        responsePage.setTotalPages(ordersPage.getTotalPages());
+        responsePage.setTotalOrders(ordersPage.getTotalElements());
+        responsePage.setLastPage(ordersPage.isLast());
+
+        return responsePage;
     }
 }
